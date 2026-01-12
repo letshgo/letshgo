@@ -75,7 +75,7 @@ LETSHGO_INIT() {
 
 LETSHGO_UPDATE() {
   local ENV="$1"
-  declare -n LETSHGO_ENV="LETSHGO_APPS_$(ENV)"
+  declare -n LETSHGO_ENV="LETSHGO_APPS_$ENV"
   for LETSHGO_APP in "${!LETSHGO_ENV[@]}"; do
     LETSHGO_PATH="${LETSHGO_ENV[$LETSHGO_APP]}"
     if [ -d "$LETSHGO_PATH"/.git ] && [ -f "$LETSHGO_PATH"/letshgo ]; then
