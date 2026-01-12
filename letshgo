@@ -20,9 +20,9 @@ declare -A LETSHGO_APPS_GUI=(
 )
 
 # Define cloning protocol from $2 to be either https or ssh
-if [ ${2:-} == "ssh" ]; then
+if [[ ${2:-} == "ssh" ]]; then
   LETSHGO_PROTO="ssh://git@"
-elif [ ${2:-} == "https" ]; then
+elif [[ ${2:-} == "https" ]]; then
   LETSHGO_PROTO="https://"
 elif [ $1 == "update" ]; then
   echo "Updating..."
