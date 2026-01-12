@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Define Letshgo default URI
+LETSHGO_DEFAULT_URI=github.com/letshgo
+
+# Define CLI apps
+declare -A LETSHGO_APPS_CLI=(
+  [neovim]="~/.config/nvim"
+  [tmux]="~/.config/tmux"
+  [zsh]="~/.config/zsh"
+)
+
+# Define GUI apps
+declare -A LETSHGO_APPS_GUI=(
+  [hyprland]="~/.config/hypr"
+  [kitty]="~/.config/kitty"
+  [waybar]="~/.config/waybar"
+)
+
+# Define cloning protocol from $2 to be either https or ssh
+if $2 == "ssh"; then
+  LETSHGO_PROTO="ssh://git@"
+elif $2 == "https"; then
+  LETSHGO_PROTO="https://"
+elif $1 == "update"; then
+  echo "Updating..."
+else
+  echo "Please, choose between ssh and https"
+  exit 187
+fi
+
+# Define the default URI if $3 isn't defined
+if $3 == ""; then
+  LETSHGO_URI=$LETSHGO_DEFAULT_URI
+else
+  LETSHGO_URI=$3
+fi
+
+# Functions
+LETSHGO_INSTALL() {
+  local ENV="$1"
+  declare -n LETSHGO_ENV="LETSHGO_APPS_$(ENV)"
+  for LETSHGO_APP in "${!LETSHGO_ENV[@]}"; do
+    LETSHGO_PATH="${LETSHGO_ENV[$LETSHGO_APP]}"
+    if [ -f "$LETSHGO_PATH"/letshgo ]; then
+      echo "$LETSHGO_APP configs already cloned to $LETSHGO_PATH"
+    elif [ ! -d $LETSHGO_PATH ]; then
+      git clone "$LETSHGO_PROTO""$LETSHGO_URI"/"$LETSHGO_APP".git $LETSHGO_PATH
+      echo "Cloned config file repo for $LETSHGO_APP to $LETSHGO_PATH"
+    elif [ -d $LETSHGO_PATH ] && [ ! -f $LETSHGO_PATH/letshgo]; then
+      mv $LETSHGO_PATH "$LETSHGO_PATH"-old
+      echo "Backed up existing $LETSHGO_APP config folder to $LETSHGO_PATH""-old"
+      git clone "$LETSHGO_PROTO""$LETSHGO_URI"/"$LETSHGO_APP".git $LETSHGO_PATH
+      echo "Cloned $LETSHGO_APP config file repo to $LETSHGO_PATH"
+    else
+      echo "Something stupid happened. Please, fix it."
+    fi
+  done
+}
+
+LETSHGO_INIT() {
+  local ENV="$1"
+  declare -n LETSHGO_ENV="LETSHGO_APPS_$(ENV)"
+  for LETSHGO_APP in "${!LETSHGO_ENV[@]}"; do
+    LETSHGO_PATH="${LETSHGO_ENV[$LETSHGO_APP]}"
+    if [ -f $LETSHGO_PATH/letshgo ]; then
+      (cd $LETSHGO_PATH && bash letshgo && echo "$LETSHGO_APP initialized" | tee "$LETSHGO_PATH"/letshgo.init)
+    else
+      echo "Initialization script missing."
+    fi
+  done
+}
+
+LETSHGO_UPDATE() {
+  local ENV="$1"
+  declare -n LETSHGO_ENV="LETSHGO_APPS_$(ENV)"
+  for LETSHGO_APP in "${!LETSHGO_ENV[@]}"; do
+    LETSHGO_PATH="${LETSHGO_ENV[$LETSHGO_APP]}"
+    if [ -d "$LETSHGO_PATH"/.git ] && [ -f "$LETSHGO_PATH"/letshgo ]; then
+      (cd $LETSHGO_PATH && git pull && echo "Updated $LETSHGO_APP configs in $LETSHGO_PATH")
+    else
+      echo "$LETSHGO_APP not cloned to $LETSHGO_PATH"
+    fi
+  done
+}
+
+# Clone repos
+if $1 == "gui"; then
+  LETSHGO_INSTALL CLI && LETSHGO_INIT CLI
+  LETSHGO_INSTALL GUI && LETSHGO_INIT GUI
+elif $1 == "cli"; then
+  LETSHGO_INSTALL CLI && LETSHGO_INIT CLI
+elif $1 == "update"; then
+  LETSHGO_UPDATE CLI
+  if [ -d "${LETSHGO_APPS_GUI[0]}" ]; then
+    LETSHGO_UPDATE GUI
+  fi
+else
+  echo "Please, choose between cli, gui and update"
+  exit 187
+fi
