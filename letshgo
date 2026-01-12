@@ -4,9 +4,12 @@ set -euo pipefail
 
 # Define Letshgo default URI
 LETSHGO_DEFAULT_URI=github.com/letshgo
+LETSHGO_LOG_STAMP="LETSHGO:"
 
 # Define CLI apps
 declare -A LETSHGO_APPS_CLI=(
+  [git]="$HOME/.config/git"
+  [newsboat]="$HOME/.config/newsboat"
   [neovim]="$HOME/.config/nvim"
   [tmux]="$HOME/.config/tmux"
   [zsh]="$HOME/.config/zsh"
@@ -24,10 +27,12 @@ if [[ ${2:-} == "ssh" ]]; then
   LETSHGO_PROTO="ssh://git@"
 elif [[ ${2:-} == "https" ]]; then
   LETSHGO_PROTO="https://"
+elif [[ -z ${2:-} ]]; then
+  LETSHGO_PROTO="ssh://git@"
 elif [ $1 == "update" ]; then
-  echo "Updating..."
+  echo "$LETSHGO_LOG_STAMP Updating..."
 else
-  echo "Please, choose between ssh and https"
+  echo "$LETSHGO_LOG_STAMP Please, choose between ssh and https"
   exit 187
 fi
 
@@ -45,17 +50,17 @@ LETSHGO_INSTALL() {
   for LETSHGO_APP in "${!LETSHGO_ENV[@]}"; do
     LETSHGO_PATH="${LETSHGO_ENV[$LETSHGO_APP]}"
     if [ -f "$LETSHGO_PATH"/letshgo ]; then
-      echo "$LETSHGO_APP configs already cloned to $LETSHGO_PATH"
+      echo "$LETSHGO_LOG_STAMP $LETSHGO_APP configs already cloned to $LETSHGO_PATH"
     elif [ ! -d $LETSHGO_PATH ]; then
       git clone "$LETSHGO_PROTO""$LETSHGO_URI"/"$LETSHGO_APP".git $LETSHGO_PATH
-      echo "Cloned config file repo for $LETSHGO_APP to $LETSHGO_PATH"
+      echo "$LETSHGO_LOG_STAMP Cloned config file repo for $LETSHGO_APP to $LETSHGO_PATH"
     elif [ -d $LETSHGO_PATH ] && [ ! -f "$LETSHGO_PATH"/letshgo]; then
       mv $LETSHGO_PATH "$LETSHGO_PATH"-old
-      echo "Backed up existing $LETSHGO_APP config folder to $LETSHGO_PATH""-old"
+      echo "$LETSHGO_LOG_STAMP Backed up existing $LETSHGO_APP config folder to $LETSHGO_PATH""-old"
       git clone "$LETSHGO_PROTO""$LETSHGO_URI"/"$LETSHGO_APP".git $LETSHGO_PATH
-      echo "Cloned $LETSHGO_APP config file repo to $LETSHGO_PATH"
+      echo "$LETSHGO_LOG_STAMP Cloned $LETSHGO_APP config file repo to $LETSHGO_PATH"
     else
-      echo "Something stupid happened. Please, fix it."
+      echo "$LETSHGO_LOG_STAMP Something stupid happened. Please, fix it."
     fi
   done
 }
@@ -66,9 +71,9 @@ LETSHGO_INIT() {
   for LETSHGO_APP in "${!LETSHGO_ENV[@]}"; do
     LETSHGO_PATH="${LETSHGO_ENV[$LETSHGO_APP]}"
     if [ -f $LETSHGO_PATH/letshgo ]; then
-      (cd $LETSHGO_PATH && bash letshgo && echo "$LETSHGO_APP initialized" | tee "$LETSHGO_PATH"/letshgo.init)
+      (cd $LETSHGO_PATH && bash letshgo)
     else
-      echo "Initialization script missing."
+      echo "$LETSHGO_LOG_STAMP Initialization script missing."
     fi
   done
 }
@@ -81,12 +86,12 @@ LETSHGO_UPDATE() {
     if [ -d "$LETSHGO_PATH"/.git ] && [ -f "$LETSHGO_PATH"/letshgo ]; then
       (cd $LETSHGO_PATH && git pull && bash letshgo && echo "Updated $LETSHGO_APP configs in $LETSHGO_PATH")
     else
-      echo "$LETSHGO_APP not cloned to $LETSHGO_PATH"
+      echo "$LETSHGO_LOG_STAMP $LETSHGO_APP not cloned to $LETSHGO_PATH"
     fi
   done
 }
 
-# Clone repos
+# Installation
 if [ $1 == "gui" ]; then
   LETSHGO_INSTALL CLI && LETSHGO_INIT CLI
   LETSHGO_INSTALL GUI && LETSHGO_INIT GUI
@@ -97,7 +102,9 @@ elif [ $1 == "update" ]; then
   if [ -d "${LETSHGO_APPS_GUI[hyprland]}" ]; then
     LETSHGO_UPDATE GUI
   fi
+elif [[ -z ${1:-} ]]; then
+  LETSHGO_INSTALL CLI && LETSHGO_INIT CLI
 else
-  echo "Please, choose between cli, gui and update"
+  echo "$LETSHGO_LOG_STAMP Please, choose between cli, gui, update or uninstall"
   exit 187
 fi
