@@ -41,7 +41,7 @@ fi
 # Functions
 LETSHGO_INSTALL() {
   local ENV="$1"
-  declare -n LETSHGO_ENV="LETSHGO_APPS_$(ENV)"
+  declare -n LETSHGO_ENV="LETSHGO_APPS_$ENV"
   for LETSHGO_APP in "${!LETSHGO_ENV[@]}"; do
     LETSHGO_PATH="${LETSHGO_ENV[$LETSHGO_APP]}"
     if [ -f "$LETSHGO_PATH"/letshgo ]; then
@@ -62,7 +62,7 @@ LETSHGO_INSTALL() {
 
 LETSHGO_INIT() {
   local ENV="$1"
-  declare -n LETSHGO_ENV="LETSHGO_APPS_$(ENV)"
+  declare -n LETSHGO_ENV="LETSHGO_APPS_$ENV"
   for LETSHGO_APP in "${!LETSHGO_ENV[@]}"; do
     LETSHGO_PATH="${LETSHGO_ENV[$LETSHGO_APP]}"
     if [ -f $LETSHGO_PATH/letshgo ]; then
