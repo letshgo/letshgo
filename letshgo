@@ -7,16 +7,16 @@ LETSHGO_DEFAULT_URI=github.com/letshgo
 
 # Define CLI apps
 declare -A LETSHGO_APPS_CLI=(
-  [neovim]="~/.config/nvim"
-  [tmux]="~/.config/tmux"
-  [zsh]="~/.config/zsh"
+  [neovim]="$HOME/.config/nvim"
+  [tmux]="$HOME/.config/tmux"
+  [zsh]="$HOME/.config/zsh"
 )
 
 # Define GUI apps
 declare -A LETSHGO_APPS_GUI=(
-  [hyprland]="~/.config/hypr"
-  [kitty]="~/.config/kitty"
-  [waybar]="~/.config/waybar"
+  [hyprland]="$HOME/.config/hypr"
+  [kitty]="$HOME/.config/kitty"
+  [waybar]="$HOME/.config/waybar"
 )
 
 # Define cloning protocol from $2 to be either https or ssh
