@@ -20,11 +20,11 @@ declare -A LETSHGO_APPS_GUI=(
 )
 
 # Define cloning protocol from $2 to be either https or ssh
-if $2 == "ssh"; then
+if [ $2 == "ssh" ]; then
   LETSHGO_PROTO="ssh://git@"
-elif $2 == "https"; then
+elif [ $2 == "https" ]; then
   LETSHGO_PROTO="https://"
-elif $1 == "update"; then
+elif [ $1 == "update" ]; then
   echo "Updating..."
 else
   echo "Please, choose between ssh and https"
@@ -32,7 +32,7 @@ else
 fi
 
 # Define the default URI if $3 isn't defined
-if $3 == ""; then
+if [ $3 == "" ]; then
   LETSHGO_URI=$LETSHGO_DEFAULT_URI
 else
   LETSHGO_URI=$3
@@ -87,12 +87,12 @@ LETSHGO_UPDATE() {
 }
 
 # Clone repos
-if $1 == "gui"; then
+if [ $1 == "gui" ]; then
   LETSHGO_INSTALL CLI && LETSHGO_INIT CLI
   LETSHGO_INSTALL GUI && LETSHGO_INIT GUI
-elif $1 == "cli"; then
+elif [ $1 == "cli" ]; then
   LETSHGO_INSTALL CLI && LETSHGO_INIT CLI
-elif $1 == "update"; then
+elif [ $1 == "update" ]; then
   LETSHGO_UPDATE CLI
   if [ -d "${LETSHGO_APPS_GUI[0]}" ]; then
     LETSHGO_UPDATE GUI
