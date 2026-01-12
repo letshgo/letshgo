@@ -94,7 +94,7 @@ elif [ $1 == "cli" ]; then
   LETSHGO_INSTALL CLI && LETSHGO_INIT CLI
 elif [ $1 == "update" ]; then
   LETSHGO_UPDATE CLI
-  if [ -d "${LETSHGO_APPS_GUI[0]}" ]; then
+  if [ -d "${LETSHGO_APPS_GUI[hyprland]}" ]; then
     LETSHGO_UPDATE GUI
   fi
 else
