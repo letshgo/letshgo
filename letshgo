@@ -56,7 +56,7 @@ LETSHGO_INSTALL() {
     elif [ ! -d $LETSHGO_PATH ]; then
       git clone "$LETSHGO_PROTO""$LETSHGO_URI"/"$LETSHGO_APP".git $LETSHGO_PATH
       echo "$LETSHGO_LOG_STAMP Cloned config file repo for $LETSHGO_APP to $LETSHGO_PATH"
-    elif [ -d $LETSHGO_PATH ] && [ ! -f "$LETSHGO_PATH"/letshgo]; then
+    elif [ -d $LETSHGO_PATH ] && [ ! -f "$LETSHGO_PATH"/letshgo ]; then
       mv $LETSHGO_PATH "$LETSHGO_PATH"-old
       echo "$LETSHGO_LOG_STAMP Backed up existing $LETSHGO_APP config folder to $LETSHGO_PATH""-old"
       git clone "$LETSHGO_PROTO""$LETSHGO_URI"/"$LETSHGO_APP".git $LETSHGO_PATH
