@@ -79,7 +79,7 @@ LETSHGO_UPDATE() {
   for LETSHGO_APP in "${!LETSHGO_ENV[@]}"; do
     LETSHGO_PATH="${LETSHGO_ENV[$LETSHGO_APP]}"
     if [ -d "$LETSHGO_PATH"/.git ] && [ -f "$LETSHGO_PATH"/letshgo ]; then
-      (cd $LETSHGO_PATH && git pull && echo "Updated $LETSHGO_APP configs in $LETSHGO_PATH")
+      (cd $LETSHGO_PATH && git pull && bash letshgo && echo "Updated $LETSHGO_APP configs in $LETSHGO_PATH")
     else
       echo "$LETSHGO_APP not cloned to $LETSHGO_PATH"
     fi
