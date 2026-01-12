@@ -1,0 +1,118 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Define Letshgo default URI
+LETSHGO_DEFAULT_URI=github.com/letshgo
+LETSHGO_LOG_STAMP="LETSHGO:"
+
+# Define CLI apps
+declare -A LETSHGO_APPS_CLI=(
+  [btop]="$HOME/.config/btop"
+  [eza]="$HOME/.config/eza"
+  [git]="$HOME/.config/git"
+  [htop]="$HOME/.config/htop"
+  [lazygit]="$HOME/.config/lazygit"
+  [newsboat]="$HOME/.config/newsboat"
+  [neovim]="$HOME/.config/nvim"
+  [ripgrep]="$HOME/.config/ripgrep"
+  [tmux]="$HOME/.config/tmux"
+  [zsh]="$HOME/.config/zsh"
+)
+
+# Define GUI apps
+declare -A LETSHGO_APPS_GUI=(
+  [hyprland]="$HOME/.config/hypr"
+  [kitty]="$HOME/.config/kitty"
+  [waybar]="$HOME/.config/waybar"
+)
+
+# Define cloning protocol from $2 to be either https or ssh
+if [[ ${2:-} == "ssh" ]]; then
+  LETSHGO_PROTO="ssh://git@"
+elif [[ ${2:-} == "https" ]]; then
+  LETSHGO_PROTO="https://"
+elif [[ -z ${2:-} ]]; then
+  LETSHGO_PROTO="ssh://git@"
+else
+  echo "$LETSHGO_LOG_STAMP Please, choose between ssh and https"
+  exit 187
+fi
+
+# Define the default URI if $3 isn't defined
+if [[ -z ${3:-} ]]; then
+  LETSHGO_URI=$LETSHGO_DEFAULT_URI
+else
+  LETSHGO_URI=$3
+fi
+
+# Functions
+LETSHGO_INSTALL() {
+  declare -n LETSHGO_ENV="LETSHGO_APPS_$1"
+  for LETSHGO_APP in "${!LETSHGO_ENV[@]}"; do
+    LETSHGO_PATH="${LETSHGO_ENV[$LETSHGO_APP]}"
+    if [ -f "$LETSHGO_PATH"/letshgo ]; then
+      echo "$LETSHGO_LOG_STAMP $LETSHGO_APP configs already cloned to $LETSHGO_PATH"
+    elif [ ! -d $LETSHGO_PATH ]; then
+      (git clone "$LETSHGO_PROTO""$LETSHGO_URI"/"$LETSHGO_APP".git $LETSHGO_PATH &&
+        echo "$LETSHGO_LOG_STAMP Cloned config file repo for $LETSHGO_APP to $LETSHGO_PATH")
+    elif [ -d $LETSHGO_PATH ] && [ ! -f "$LETSHGO_PATH"/letshgo ]; then
+      (mv $LETSHGO_PATH "$LETSHGO_PATH"-old &&
+        echo "$LETSHGO_LOG_STAMP Backed up existing $LETSHGO_APP config folder to $LETSHGO_PATH""-old")
+      (git clone "$LETSHGO_PROTO""$LETSHGO_URI"/"$LETSHGO_APP".git $LETSHGO_PATH &&
+        echo "$LETSHGO_LOG_STAMP Cloned $LETSHGO_APP config file repo to $LETSHGO_PATH")
+    else
+      echo "$LETSHGO_LOG_STAMP Something stupid happened. Please, fix it."
+    fi
+  done
+}
+
+LETSHGO_INIT() {
+  declare -n LETSHGO_ENV="LETSHGO_APPS_$1"
+  for LETSHGO_APP in "${!LETSHGO_ENV[@]}"; do
+    LETSHGO_PATH="${LETSHGO_ENV[$LETSHGO_APP]}"
+    if [ -f $LETSHGO_PATH/letshgo ]; then
+      (cd $LETSHGO_PATH && bash letshgo)
+    else
+      echo "$LETSHGO_LOG_STAMP Initialization script missing from $LETSHGO_APP in $LETSHGO_PATH"
+    fi
+  done
+}
+
+LETSHGO_UPDATE() {
+  declare -n LETSHGO_ENV="LETSHGO_APPS_$1"
+  for LETSHGO_APP in "${!LETSHGO_ENV[@]}"; do
+    LETSHGO_PATH="${LETSHGO_ENV[$LETSHGO_APP]}"
+    if [ -d "$LETSHGO_PATH"/.git ] && [ -f "$LETSHGO_PATH"/letshgo ]; then
+      (cd $LETSHGO_PATH && git pull && bash letshgo && echo "Updated $LETSHGO_APP configs in $LETSHGO_PATH")
+    else
+      echo "$LETSHGO_LOG_STAMP $LETSHGO_APP not cloned to $LETSHGO_PATH"
+    fi
+  done
+}
+
+# Installation
+for cmd in pass pinentry gpg git; do
+  if ! command -v $cmd &>/dev/null; then
+    echo "$cmd required or not configured properly:"
+    echo "try running $cmd and see what happens"
+    exit 187
+  fi
+done
+if [[ ${1:-} == "gui" ]]; then
+  LETSHGO_INSTALL CLI && LETSHGO_INIT CLI
+  LETSHGO_INSTALL GUI && LETSHGO_INIT GUI
+elif [[ ${1:-} == "cli" ]]; then
+  LETSHGO_INSTALL CLI && LETSHGO_INIT CLI
+elif [[ ${1:-} == "update" ]]; then
+  echo "$LETSHGO_LOG_STAMP Updating..."
+  LETSHGO_UPDATE CLI
+  if [ -d "${LETSHGO_APPS_GUI[hyprland]}" ]; then
+    LETSHGO_UPDATE GUI
+  fi
+elif [[ -z ${1:-} ]]; then
+  LETSHGO_INSTALL CLI && LETSHGO_INIT CLI
+else
+  echo "$LETSHGO_LOG_STAMP bash letshgo cli/gui/update (https/ssh*) (github.com/letshgo*)"
+  exit 187
+fi
