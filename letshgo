@@ -75,7 +75,7 @@ LETSHGO_INIT() {
     if [ -f $LETSHGO_PATH/letshgo ]; then
       (cd $LETSHGO_PATH && bash letshgo)
     else
-      echo "$LETSHGO_LOG_STAMP Initialization script missing."
+      echo "$LETSHGO_LOG_STAMP Initialization script missing from $LETSHGO_APP"
     fi
   done
 }
