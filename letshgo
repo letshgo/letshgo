@@ -10,6 +10,7 @@ LETSHGO_LOG_STAMP="LETSHGO:"
 declare -A LETSHGO_APPS_CLI=(
   [eza]="$HOME/.config/eza"
   [git]="$HOME/.config/git"
+  [lazygit]="$HOME/.config/lazygit"
   [newsboat]="$HOME/.config/newsboat"
   [neovim]="$HOME/.config/nvim"
   [ripgrep]="$HOME/.config/ripgrep"
