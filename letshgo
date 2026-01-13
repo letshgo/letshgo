@@ -8,8 +8,10 @@ LETSHGO_LOG_STAMP="LETSHGO:"
 
 # Define CLI apps
 declare -A LETSHGO_APPS_CLI=(
+  [btop]="$HOME/.config/btop"
   [eza]="$HOME/.config/eza"
   [git]="$HOME/.config/git"
+  [htop]="$HOME/.config/htop"
   [lazygit]="$HOME/.config/lazygit"
   [newsboat]="$HOME/.config/newsboat"
   [neovim]="$HOME/.config/nvim"
