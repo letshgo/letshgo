@@ -34,7 +34,7 @@ elif [[ ${2:-} == "https" ]]; then
   LETSHGO_PROTO="https://"
 elif [[ -z ${2:-} ]]; then
   LETSHGO_PROTO="ssh://git@"
-elif [ $1 == "update" ]; then
+elif [[ $1 == "update" ]]; then
   echo "$LETSHGO_LOG_STAMP Updating..."
 else
   echo "$LETSHGO_LOG_STAMP Please, choose between ssh and https"
