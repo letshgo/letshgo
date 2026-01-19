@@ -24,6 +24,7 @@ declare -A LETSHGO_APPS_CLI=(
 declare -A LETSHGO_APPS_GUI=(
   [hyprland]="$HOME/.config/hypr"
   [kitty]="$HOME/.config/kitty"
+  [mako]="$HOME/.config/config"
   [waybar]="$HOME/.config/waybar"
 )
 
