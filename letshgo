@@ -29,10 +29,23 @@ declare -A LETSHGO_APPS_GUI=(
 )
 
 # Define cloning protocol from $2 to be either https or ssh
-[[ ${2:-} == "ssh" ]] && LETSHGO_PROTO="ssh://git@" || [[ ${2:-} == "https" ]] && LETSHGO_PROTO="https://" || [[ -z ${2:-} ]] && LETSHGO_PROTO="ssh://git@" || echo "$LETSHGO_LOG_STAMP Please, choose between ssh and https" && exit 187
+if [[ ${2:-} == "ssh" ]]; then
+  LETSHGO_PROTO="ssh://git@"
+elif [[ ${2:-} == "https" ]]; then
+  LETSHGO_PROTO="https://"
+elif [[ -z ${2:-} ]]; then
+  LETSHGO_PROTO="ssh://git@"
+else
+  echo "$LETSHGO_LOG_STAMP Please, choose between ssh and https"
+  exit 187
+fi
 
 # Define the default URI if $3 isn't defined
-[[ -z ${3:-} ]] && LETSHGO_URI=$LETSHGO_DEFAULT_URI || LETSHGO_URI=$3
+if [[ -z ${3:-} ]]; then
+  LETSHGO_URI=$LETSHGO_DEFAULT_URI
+else
+  LETSHGO_URI=$3
+fi
 
 # Functions
 LETSHGO_INSTALL() {
@@ -42,8 +55,8 @@ LETSHGO_INSTALL() {
     if [ -f "$LETSHGO_PATH"/letshgo ]; then
       echo "$LETSHGO_LOG_STAMP $LETSHGO_APP configs already cloned to $LETSHGO_PATH"
     elif [ ! -d "$LETSHGO_PATH" ]; then
-      git clone "$LETSHGO_PROTO""$LETSHGO_URI"/"$LETSHGO_APP".git "$LETSHGO_PATH" &&
-        echo "$LETSHGO_LOG_STAMP Cloned config file repo for $LETSHGO_APP to $LETSHGO_PATH"
+      (git clone "$LETSHGO_PROTO""$LETSHGO_URI"/"$LETSHGO_APP".git "$LETSHGO_PATH" &&
+        echo "$LETSHGO_LOG_STAMP Cloned config file repo for $LETSHGO_APP to $LETSHGO_PATH")
     elif [ -d "$LETSHGO_PATH" ] && [ ! -f "$LETSHGO_PATH"/letshgo ]; then
       mv "$LETSHGO_PATH" "$LETSHGO_PATH"-old &&
         echo "$LETSHGO_LOG_STAMP Backed up existing $LETSHGO_APP config folder to $LETSHGO_PATH""-old"
@@ -60,7 +73,7 @@ LETSHGO_INIT() {
   for LETSHGO_APP in "${!LETSHGO_ENV[@]}"; do
     LETSHGO_PATH="${LETSHGO_ENV[$LETSHGO_APP]}"
     if [ -f "$LETSHGO_PATH"/letshgo ]; then
-      cd "$LETSHGO_PATH" && bash letshgo
+      (cd "$LETSHGO_PATH" && bash letshgo)
     else
       echo "$LETSHGO_LOG_STAMP Initialization script missing from $LETSHGO_APP in $LETSHGO_PATH"
     fi
