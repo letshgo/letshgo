@@ -24,28 +24,15 @@ declare -A LETSHGO_APPS_CLI=(
 declare -A LETSHGO_APPS_GUI=(
   [hyprland]="$HOME/.config/hypr"
   [kitty]="$HOME/.config/kitty"
-  [mako]="$HOME/.config/config"
+  [mako]="$HOME/.config/mako"
   [waybar]="$HOME/.config/waybar"
 )
 
 # Define cloning protocol from $2 to be either https or ssh
-if [[ ${2:-} == "ssh" ]]; then
-  LETSHGO_PROTO="ssh://git@"
-elif [[ ${2:-} == "https" ]]; then
-  LETSHGO_PROTO="https://"
-elif [[ -z ${2:-} ]]; then
-  LETSHGO_PROTO="ssh://git@"
-else
-  echo "$LETSHGO_LOG_STAMP Please, choose between ssh and https"
-  exit 187
-fi
+[[ ${2:-} == "ssh" ]] && LETSHGO_PROTO="ssh://git@" || [[ ${2:-} == "https" ]] && LETSHGO_PROTO="https://" || [[ -z ${2:-} ]] && LETSHGO_PROTO="ssh://git@" || echo "$LETSHGO_LOG_STAMP Please, choose between ssh and https" && exit 187
 
 # Define the default URI if $3 isn't defined
-if [[ -z ${3:-} ]]; then
-  LETSHGO_URI=$LETSHGO_DEFAULT_URI
-else
-  LETSHGO_URI=$3
-fi
+[[ -z ${3:-} ]] && LETSHGO_URI=$LETSHGO_DEFAULT_URI || LETSHGO_URI=$3
 
 # Functions
 LETSHGO_INSTALL() {
@@ -54,14 +41,14 @@ LETSHGO_INSTALL() {
     LETSHGO_PATH="${LETSHGO_ENV[$LETSHGO_APP]}"
     if [ -f "$LETSHGO_PATH"/letshgo ]; then
       echo "$LETSHGO_LOG_STAMP $LETSHGO_APP configs already cloned to $LETSHGO_PATH"
-    elif [ ! -d $LETSHGO_PATH ]; then
-      (git clone "$LETSHGO_PROTO""$LETSHGO_URI"/"$LETSHGO_APP".git $LETSHGO_PATH &&
-        echo "$LETSHGO_LOG_STAMP Cloned config file repo for $LETSHGO_APP to $LETSHGO_PATH")
-    elif [ -d $LETSHGO_PATH ] && [ ! -f "$LETSHGO_PATH"/letshgo ]; then
-      (mv $LETSHGO_PATH "$LETSHGO_PATH"-old &&
-        echo "$LETSHGO_LOG_STAMP Backed up existing $LETSHGO_APP config folder to $LETSHGO_PATH""-old")
-      (git clone "$LETSHGO_PROTO""$LETSHGO_URI"/"$LETSHGO_APP".git $LETSHGO_PATH &&
-        echo "$LETSHGO_LOG_STAMP Cloned $LETSHGO_APP config file repo to $LETSHGO_PATH")
+    elif [ ! -d "$LETSHGO_PATH" ]; then
+      git clone "$LETSHGO_PROTO""$LETSHGO_URI"/"$LETSHGO_APP".git "$LETSHGO_PATH" &&
+        echo "$LETSHGO_LOG_STAMP Cloned config file repo for $LETSHGO_APP to $LETSHGO_PATH"
+    elif [ -d "$LETSHGO_PATH" ] && [ ! -f "$LETSHGO_PATH"/letshgo ]; then
+      mv "$LETSHGO_PATH" "$LETSHGO_PATH"-old &&
+        echo "$LETSHGO_LOG_STAMP Backed up existing $LETSHGO_APP config folder to $LETSHGO_PATH""-old"
+      git clone "$LETSHGO_PROTO""$LETSHGO_URI"/"$LETSHGO_APP".git "$LETSHGO_PATH" &&
+        echo "$LETSHGO_LOG_STAMP Cloned $LETSHGO_APP config file repo to $LETSHGO_PATH"
     else
       echo "$LETSHGO_LOG_STAMP Something stupid happened. Please, fix it."
     fi
@@ -72,8 +59,8 @@ LETSHGO_INIT() {
   declare -n LETSHGO_ENV="LETSHGO_APPS_$1"
   for LETSHGO_APP in "${!LETSHGO_ENV[@]}"; do
     LETSHGO_PATH="${LETSHGO_ENV[$LETSHGO_APP]}"
-    if [ -f $LETSHGO_PATH/letshgo ]; then
-      (cd $LETSHGO_PATH && bash letshgo)
+    if [ -f "$LETSHGO_PATH"/letshgo ]; then
+      cd "$LETSHGO_PATH" && bash letshgo
     else
       echo "$LETSHGO_LOG_STAMP Initialization script missing from $LETSHGO_APP in $LETSHGO_PATH"
     fi
@@ -85,7 +72,7 @@ LETSHGO_UPDATE() {
   for LETSHGO_APP in "${!LETSHGO_ENV[@]}"; do
     LETSHGO_PATH="${LETSHGO_ENV[$LETSHGO_APP]}"
     if [ -d "$LETSHGO_PATH"/.git ] && [ -f "$LETSHGO_PATH"/letshgo ]; then
-      (cd $LETSHGO_PATH && git pull && bash letshgo && echo "Updated $LETSHGO_APP configs in $LETSHGO_PATH")
+      cd "$LETSHGO_PATH" && git pull && bash letshgo && echo "Updated $LETSHGO_APP configs in $LETSHGO_PATH"
     else
       echo "$LETSHGO_LOG_STAMP $LETSHGO_APP not cloned to $LETSHGO_PATH"
     fi
