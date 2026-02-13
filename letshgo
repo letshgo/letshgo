@@ -22,6 +22,7 @@ declare -A LETSHGO_APPS_CLI=(
 
 # Define GUI apps
 declare -A LETSHGO_APPS_GUI=(
+  [alacritty]="$HOME/.config/alacritty"
   [hyprland]="$HOME/.config/hypr"
   [kitty]="$HOME/.config/kitty"
   [mako]="$HOME/.config/mako"
